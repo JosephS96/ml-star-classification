@@ -1,7 +1,11 @@
-import pandas as pd
+from dataset.DatasetWrapper import DatasetWrapper
 
 print("this if ML")
 
-data = pd.read_csv("dataset/Stars.csv")
+data = DatasetWrapper()
+print(data.get_item(1))
 
-print(data.describe())
+for i in range(data.get_len()):
+    unique_colors = []
+    if ()
+
