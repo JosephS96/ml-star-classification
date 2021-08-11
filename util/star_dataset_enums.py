@@ -13,10 +13,10 @@ class StarColor(Enum):
     ORANGE_RED = 8
     PALE_YELLOW_ORANGE = 9
 
-
-    #{'Blue White', 'Yellowish White', 'Blue', 'Orange', 'white', 'yellowish', 'Blue-White', 'Yellowish', 'Blue-white',
+    # {'Blue White', 'Yellowish White', 'Blue', 'Orange', 'white', 'yellowish', 'Blue-White', 'Yellowish', 'Blue-white',
     # 'Blue white', 'yellow-white', 'White-Yellow', 'Red', 'Whitish', 'Color', 'Orange-Red', 'Pale yellow orange',
     # 'White'}
+
 
 class SpectralClass(Enum):
     O = 0
