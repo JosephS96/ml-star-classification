@@ -30,6 +30,16 @@ class BaseClassifier(ABC):
         """"Evaluates the model returning all the important metrics, accuracy, f1 score and loss values
         for the given test data
 
-        :return: ModelHistory object with the respective history of metrics for plotting
+        :return: Metrics in separate variables
         """
         pass
+
+    def get_training_history(self):
+        """Get the history of the training contained in lists for the global model (not per class)
+
+        :returns List of values for accuracy, precision, recall and f1-score
+        """
+        return self.history.get_training_metrics()
+
+    def get_test_metrics(self, predicted, ground_truth, print_metrics = True):
+        return self.history.get_evaluation_report(predicted, ground_truth, print_metrics)

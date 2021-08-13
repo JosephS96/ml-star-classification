@@ -1,6 +1,7 @@
 import tensorflow as tf
 from tensorflow import keras
 from classifiers.BaseClassifier import BaseClassifier
+import numpy as np
 
 
 class NeuralClassifier(BaseClassifier):
@@ -31,10 +32,18 @@ class NeuralClassifier(BaseClassifier):
         return history
 
     def predict(self, x):
-        pass
+        output = self.model.predict(x)
+        output = np.argmax(output, axis=1)
+
+        return output
 
     def evaluate(self, x, y):
         history = self.model.evaluate(x, y)
+        print(history)
+
+        prediction = self.predict(x)
+        _, _, _, _ = self.history.get_evaluation_report(prediction, y)
+
         return history
 
 
