@@ -7,7 +7,7 @@ class ModelHistory:
     def __init__(self, show_progress=True):
         self.n_epochs = 1
 
-        #Global metrics of the model
+        # Global metrics of the model
         self.__accuracy = []
         self.__f1_score = []
         self.__precision = []
@@ -15,7 +15,8 @@ class ModelHistory:
 
         self.__show_progress = show_progress
 
-    """This method should be called at the end of each epoch in order to calculate the metrics for the classifier at the specified epoch
+    """This method should be called at the end of each epoch in order to calculate the metrics for the classifier at the 
+        specified epoch
         :arg predicted: array of predictions of the class
         :arg ground_truth array with the correct label corresponding to the predicted values
     """

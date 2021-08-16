@@ -26,7 +26,7 @@ class BaseClassifier(ABC):
         pass
 
     @abstractmethod
-    def evaluate(self, x, y):
+    def evaluate(self, x, y, print_metrics=True):
         """"Evaluates the model returning all the important metrics, accuracy, f1 score and loss values
         for the given test data
 
@@ -41,5 +41,5 @@ class BaseClassifier(ABC):
         """
         return self.history.get_training_metrics()
 
-    def get_test_metrics(self, predicted, ground_truth, print_metrics = True):
+    def get_test_metrics(self, predicted, ground_truth, print_metrics=True):
         return self.history.get_evaluation_report(predicted, ground_truth, print_metrics)

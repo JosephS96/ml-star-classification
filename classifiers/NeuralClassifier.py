@@ -37,12 +37,12 @@ class NeuralClassifier(BaseClassifier):
 
         return output
 
-    def evaluate(self, x, y):
+    def evaluate(self, x, y, print_metrics=True):
         #history = self.model.evaluate(x, y)
         #print(history)
 
         prediction = self.predict(x)
-        accuracy, precision, recall, f1_score = self.get_test_metrics(prediction, y)
+        accuracy, precision, recall, f1_score = self.get_test_metrics(prediction, y, print_metrics=print_metrics)
 
         return accuracy, precision, recall, f1_score
 

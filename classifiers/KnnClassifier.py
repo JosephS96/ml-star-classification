@@ -13,6 +13,15 @@ class KnnClassifier(BaseClassifier):
         self.data = []
         self.labels = []
 
+    def get_distance(self, x, y):
+        # Calculate distance from point A to point B
+        # Assume that x and y are the same dimension array [1, 2, 3, ...]
+        dist_sum = 0
+        for i in range(len(x) - 1):  # -1 excludes the target label form the count
+            dist_sum += (y[i] - x[i]) ** 2
+
+        return math.sqrt(dist_sum)
+
     def fit(self, x, y, epochs, batch_size):
         # Store the dataset for comparison
         for i in range(len(y)):
@@ -53,14 +62,8 @@ class KnnClassifier(BaseClassifier):
 
         return predictions
 
-    def evaluate(self, x, y):
-        pass
+    def evaluate(self, x, y, print_metrics=True):
+        prediction = self.predict(x)
+        accuracy, precision, recall, f1_score = self.get_test_metrics(prediction, y, print_metrics=print_metrics)
 
-    def get_distance(self, x, y):
-        # Calculate distance from point A to point B
-        # Assume that x and y are the same dimension array [1, 2, 3, ...]
-        dist_sum = 0
-        for i in range(len(x) - 1):  # -1 excludes the target label form the count
-            dist_sum += (y[i] - x[i]) ** 2
-
-        return math.sqrt(dist_sum)
+        return accuracy, precision, recall, f1_score
