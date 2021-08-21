@@ -13,6 +13,7 @@ class NaiveBayesClassifier(BaseClassifier):
         self.stds = []
 
     """Define the prior probabilities of each class, prior probability was defined as class-count / sample size"""
+
     def set_priors(self, y_labels):
         labels_count = np.zeros(self.n_classes)
         for label in y_labels:
@@ -22,6 +23,7 @@ class NaiveBayesClassifier(BaseClassifier):
         self.priors = labels_count
 
     """Receives features (x) and labels (y)"""
+
     def set_means_and_stds(self, features, labels):
         class_means = []
         class_stds = []
@@ -46,6 +48,7 @@ class NaiveBayesClassifier(BaseClassifier):
         self.stds = class_stds
 
     """"This function should receive a single value (array with features)"""
+
     def get_class_probs(self, x):
         class_probs = []
         # prob_sum = 0
@@ -54,14 +57,19 @@ class NaiveBayesClassifier(BaseClassifier):
         for c in range(self.n_classes):
             gauss_result = 0
 
+            # If the current item is NaN skip to the next
+            if not isinstance(self.means[c], np.ndarray):
+                continue
+
             # Loop through all the features of the item
             for i in range(len(x)):
                 # mean and std to use for each selected class for each feature
+                # print(self.means)
                 mu = self.means[c][i]
                 sigma = self.stds[c][i]
 
                 # Multiplication for the gaussian
-                gauss = (1.0 / np.sqrt(2 * np.pi * sigma**2)) * np.exp(-0.5 * ((x[i] - mu) / sigma)**2)
+                gauss = (1.0 / np.sqrt(2 * np.pi * sigma ** 2)) * np.exp(-0.5 * ((x[i] - mu) / sigma) ** 2)
 
                 # We take the log and turn it into a sum due to underflow issues with the probabilities
                 if gauss > 0:

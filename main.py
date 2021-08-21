@@ -28,6 +28,10 @@ accuracy, precision, recall, f1_score = boost.fit(train_data, train_labels, epoc
 # accuracy, precision, recall, f1_score = boost.fit(x.tolist(), y.tolist(), epochs=300, batch_size=0)
 boost.evaluate(test_data, test_labels)
 
+# bayes = NaiveBayesClassifier()
+# bayes.fit(train_data, train_labels, epochs=0, batch_size=0)
+# bayes.evaluate(test_data, test_labels)
+
 #knn = KnnClassifier()
 #knn.fit(train_data, train_labels, epochs=0, batch_size=0)
 

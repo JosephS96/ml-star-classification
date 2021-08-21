@@ -48,6 +48,6 @@ class BaseClassifier(ABC):
 
     def set_n_classes(self, y):
         unique_classes = set(y)
-        n_classes = len(unique_classes)
-
-        self.n_classes = n_classes
+        n_classes = max(unique_classes)
+        print(unique_classes)
+        self.n_classes = n_classes + 1
