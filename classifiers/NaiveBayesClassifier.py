@@ -5,10 +5,9 @@ import numpy as np
 
 # This class implements Gaussian Naive Bayes, due to the continual characteristics of the dataset
 class NaiveBayesClassifier(BaseClassifier):
-    def __init__(self, n_classes=6):
+    def __init__(self):
         super().__init__()
 
-        self.n_classes = n_classes
         self.priors = []
         self.means = []
         self.stds = []
@@ -79,13 +78,13 @@ class NaiveBayesClassifier(BaseClassifier):
         return class_probs
 
     def fit(self, x, y, epochs, batch_size):
+        self.set_n_classes(y)
+
         # Calculate the priors
         self.set_priors(y)
 
         # Calculate means and stds for distributions
         self.set_means_and_stds(x, y)
-
-        self.get_class_probs(x[0])
 
     def predict(self, x):
         predictions = []

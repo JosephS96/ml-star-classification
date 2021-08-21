@@ -3,51 +3,94 @@ from sklearn.tree import DecisionTreeClassifier
 import math
 import numpy as np
 
+from classifiers.KnnClassifier import KnnClassifier
+from classifiers.NaiveBayesClassifier import NaiveBayesClassifier
+
 
 class AdaBoostClassifier(BaseClassifier):
-    def __init__(self, n_classes=6):
+    def __init__(self):
         super().__init__()
 
         self.sample_weights = []  # weights for each x entrance
         self.alphas = []  # weights for the classifiers
         self.classifiers = []  # the trained classifiers
 
-        self.n_classes = n_classes
-
     """Error rate of the candidate is defined as the sum of the weights from teh misclassified sample"""
     def calculate_error_rate(self, x, y):
         error_sum = 0
         # Check the predictions against the ground truth
-        for i in range(x):
+        for i in range(len(x)):
             if x[i] != y[i]:
                 error_sum += self.sample_weights[i]
 
-        return error_sum / np.sum(self.sample_weights)
+        weights_sum = np.sum(self.sample_weights)
+        return error_sum / weights_sum
 
     """Calculate weight for the given classifier
         This is the main change for multi-class adaboosting taken from the Stanford paper "Multi-class AdaBoost"
     """
     def calculate_alpha(self, error):
-        return math.log((1 - error) / error) + math.log(self.n_classes - 1)
+        if error > 0:
+            return math.log((1 - error) / error) + math.log(self.n_classes - 1)
+        else:
+            return 1
 
-    def update_weights(self, prediction, ground_truth, error):
+    def normalize_alphas(self):
+        alphas_sum = 0
+        for i in range(len(self.alphas)):
+            alphas_sum += self.alphas[i]
+
+        for i in range(len(self.alphas)):
+            self.alphas[i] = self.alphas[i] / alphas_sum
+
+    def update_weights(self, prediction, ground_truth, alpha):
         for i in range(len(prediction)):
-            if prediction[i] == ground_truth[i]:
-                self.sample_weights[i] = 0.5 * (self.sample_weights[i] / (1 - error))
-            else:
-                self.sample_weights[i] = 0.5 * (self.sample_weights[i] / error)
+            if prediction[i] != ground_truth[i]:
+                self.sample_weights[i] = self.sample_weights[i] * np.exp(alpha)
 
-            # self.sample_weights[i] = self.sample_weights[i] * np.exp(-alpha * ground_truth[i] * prediction[i])
+        weights_sum = np.sum(self.sample_weights)
+
+        # Re-normalize the weights so they add up to 1
+        for i in range(len(self.sample_weights)):
+            self.sample_weights[i] = self.sample_weights[i] / weights_sum
+
+    def resample(self, x, y, weights):
+        # Re-sample with probabilities
+        n_samples = len(x)
+        indexes_list = list(range(0, n_samples))
+        new_sample = np.random.choice(indexes_list, n_samples, p=weights)
+
+        # Divide into x and y again
+        new_x = []
+        new_y = []
+
+        for index in new_sample:
+            new_x.append(x[index])
+            new_y.append(y[index])
+
+        return new_x, new_y
 
     def fit(self, x, y, epochs, batch_size):
+        self.set_n_classes(y)
+
         # Set initial weights
         initial_weight = 1 / len(x)
         self.sample_weights = [initial_weight] * len(x)
 
         for epoch in range(epochs):
             # Fit current learner
-            weak_classifier = DecisionTreeClassifier(max_depth=1, max_leaf_nodes=2)
-            weak_classifier.fit(x, y, sample_weight=self.sample_weights)
+            # weak_classifier = DecisionTreeClassifier(max_depth=2)
+            # weak_classifier.fit(x, y, sample_weight=self.sample_weights)
+
+            new_x, new_y = self.resample(x, y, self.sample_weights)
+            # weak_classifier = KnnClassifier(n_neighbors=11)
+            # weak_classifier.fit(new_x, new_y, epochs=0, batch_size=0)
+            weak_classifier = NaiveBayesClassifier()
+            weak_classifier.fit(new_x, new_y, epochs=0, batch_size=0)
+
+            # Evaluate weak classifier for reference
+            print("Weak classifier: ")
+            # weak_classifier.evaluate(new_x, new_y, print_metrics=True)
 
             # Calculate error and stump weight from weak learner prediction
             weak_prediction = weak_classifier.predict(x)
@@ -59,28 +102,27 @@ class AdaBoostClassifier(BaseClassifier):
             self.alphas.append(alpha)
 
             # updating weights for the next iteration (next classifier)
-            self.update_weights(weak_prediction, y, candidate_error)
+            self.update_weights(weak_prediction, y, alpha)
+
+            # Normalize alphas
+            # self.normalize_alphas()
 
             # Save metrics for history visualization
-            self.history.save_metrics(self.predict(x), y)
+            prediction = self.predict(x)
+            self.history.save_metrics(prediction, y)
+
+        return self.get_training_history()
 
     def predict(self, x):
         # Store list of predictions (classes)
-        predictions = []
+        classes_count = np.zeros(shape=(len(x), self.n_classes))
+        for m in range(len(self.classifiers)):
+            prediction = self.classifiers[m].predict(x)
+            for i in range(len(prediction)):
+                classes_count[i][prediction[i]] += self.alphas[m]
 
-        for item in x:
-            classes = [0] * self.n_classes
-            for k in range(self.n_classes):
-                for m in range(len(self.classifiers)):
-                    # Predict receives an array
-                    prediction = self.classifiers[m].predict([item])
-                    # If the classifiers outputs the desired class, sum the alphas
-                    if prediction == k:
-                        classes[k] += self.alphas[m]
-
-            # Once that I have tried all the classes with the classifiers
-            selected_class = np.argmax(classes)
-            predictions.append(selected_class)
+        # Get argmax to determine actual prediction
+        predictions = np.argmax(classes_count, axis=1)
 
         return predictions
 

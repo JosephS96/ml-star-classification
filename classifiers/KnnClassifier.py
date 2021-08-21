@@ -4,11 +4,10 @@ import math
 
 
 class KnnClassifier(BaseClassifier):
-    def __init__(self, k=5):
+    def __init__(self, n_neighbors=5):
         super().__init__()
         self.distance = 'euclidean'
-        self.k = k
-        self.n_classes = 6
+        self.k = n_neighbors
 
         self.data = []
         self.labels = []
@@ -23,11 +22,16 @@ class KnnClassifier(BaseClassifier):
         return math.sqrt(dist_sum)
 
     def fit(self, x, y, epochs, batch_size):
-        # Store the dataset for comparison
-        for i in range(len(y)):
-            x[i].append(y[i])
+        self.set_n_classes(y)
 
-        self.data = x
+        # Store the dataset for comparison
+        new_x = []
+        for i in range(len(y)):
+            item = x[i].copy()
+            item.append(y[i])
+            new_x.append(item)
+
+        self.data = new_x
 
     def predict(self, x):
         # Store list of predictions (classes)

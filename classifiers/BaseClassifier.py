@@ -1,11 +1,13 @@
 from abc import ABC, abstractmethod
 
 from ModelHistory import ModelHistory
+import numpy as np
 
 
 class BaseClassifier(ABC):
     def __init__(self):
         self.history = ModelHistory()
+        self.n_classes = None
 
     @abstractmethod
     def fit(self, x, y, epochs, batch_size):
@@ -43,3 +45,9 @@ class BaseClassifier(ABC):
 
     def get_test_metrics(self, predicted, ground_truth, print_metrics=True):
         return self.history.get_evaluation_report(predicted, ground_truth, print_metrics)
+
+    def set_n_classes(self, y):
+        unique_classes = set(y)
+        n_classes = len(unique_classes)
+
+        self.n_classes = n_classes
