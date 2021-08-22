@@ -1,16 +1,8 @@
-from sklearn.tree import DecisionTreeClassifier
-
-from classifiers.AdaBoostClassifier import AdaBoostClassifier
+from KFoldCrossValidation import KFoldCrossValidation
 from classifiers.KnnClassifier import KnnClassifier
-from classifiers.NaiveBayesClassifier import NaiveBayesClassifier
-from classifiers.NeuralClassifier import NeuralClassifier
-from PlotWrapper import PlotWrapper
 from dataset.DatasetWrapper import DatasetWrapper
-import matplotlib.pyplot as plt
-from sklearn.metrics import classification_report
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.naive_bayes import GaussianNB
-from sklearn.datasets import make_gaussian_quantiles
+from sklearn.preprocessing import StandardScaler
+import pandas as pd
 
 import numpy as np
 
@@ -21,26 +13,45 @@ data = DatasetWrapper()
 train_data, train_labels = data.get_training_data()
 test_data, test_labels = data.get_testing_data()
 
-x, y = make_gaussian_quantiles(n_samples=1300, n_features=6, n_classes=6, random_state=1)
+df = pd.DataFrame(train_data)
+print(df.describe())
 
-boost = AdaBoostClassifier()
-accuracy, precision, recall, f1_score = boost.fit(train_data, train_labels, epochs=100, batch_size=0)
-# accuracy, precision, recall, f1_score = boost.fit(x.tolist(), y.tolist(), epochs=300, batch_size=0)
-boost.evaluate(test_data, test_labels)
+# Preprocessing and normalization of data
+scaler = StandardScaler()
+scaler.fit(train_data)
+train_data = scaler.transform(train_data).tolist()
+test_data = scaler.transform(test_data).tolist()
 
-# bayes = NaiveBayesClassifier()
-# bayes.fit(train_data, train_labels, epochs=0, batch_size=0)
-# bayes.evaluate(test_data, test_labels)
+df2 = pd.DataFrame(train_data)
+print(df2.describe())
 
-#knn = KnnClassifier()
-#knn.fit(train_data, train_labels, epochs=0, batch_size=0)
+cross_validation = False
 
-#knn.evaluate(test_data, test_labels)
+# Create classifier
+classifier = KnnClassifier(n_neighbors=5)
+# classifier = NaiveBayesClassifier()
+# classifier = AdaBoostClassifier()
+# classifier = NeuralClassifier()
 
-# print(classification_report(test_labels, predictions))
+if cross_validation:
+    kfold = KFoldCrossValidation(classifier, train_data, train_labels, n_splits=5)
+    accuracy, precision, recall, f1_score = kfold.get_training_scores()
 
-plotter = PlotWrapper()
+    print("Accuracy: {}".format(accuracy))
+    print("Precision: {}".format(precision))
+    print("Recall: {}".format(recall))
+    print("F1-Score: {}".format(f1_score))
+
+    print("Final evaluation")
+    accuracy, precision, recall, f1_score = kfold.final_evaluation(test_data, test_labels)
+else:
+    accuracy, precision, recall, f1_score = classifier.fit(train_data, train_labels, epochs=100, batch_size=10)
+    # classifier.fit(train_data, train_labels, epochs=100, batch_size=10)
+    # history_train = classifier.fit(train_data, train_labels, epochs=100, batch_size=10)
+    classifier.evaluate(test_data, test_labels)
+
+# plotter = PlotWrapper()
 # plotter.plot([history_train.history['accuracy']], title='model accuracy', y_label='accuracy', x_label='epoch')
-plotter.plot([accuracy], title='model accuracy', y_label='accuracy', x_label='epoch')
+# nnplotter.plot([accuracy], title='model accuracy', y_label='accuracy', x_label='epoch')
 
 

@@ -1,5 +1,4 @@
 from classifiers.BaseClassifier import BaseClassifier
-from sklearn.tree import DecisionTreeClassifier
 import math
 import numpy as np
 

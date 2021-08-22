@@ -10,7 +10,7 @@ class KnnClassifier(BaseClassifier):
         self.k = n_neighbors
 
         self.data = []
-        self.labels = []
+        # self.labels = []
 
     def get_distance(self, x, y):
         # Calculate distance from point A to point B
@@ -25,13 +25,13 @@ class KnnClassifier(BaseClassifier):
         self.set_n_classes(y)
 
         # Store the dataset for comparison
-        new_x = []
+        # new_x = []
         for i in range(len(y)):
             item = x[i].copy()
             item.append(y[i])
-            new_x.append(item)
+            self.data.append(item)
 
-        self.data = new_x
+        # self.data = new_x
 
     def predict(self, x):
         # Store list of predictions (classes)
