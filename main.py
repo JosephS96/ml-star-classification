@@ -25,7 +25,7 @@ test_data = scaler.transform(test_data).tolist()
 df2 = pd.DataFrame(train_data)
 print(df2.describe())
 
-cross_validation = False
+cross_validation = True
 
 # Create classifier
 classifier = KnnClassifier(n_neighbors=5)
