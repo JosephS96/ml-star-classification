@@ -1,57 +1,26 @@
-from KFoldCrossValidation import KFoldCrossValidation
-from classifiers.KnnClassifier import KnnClassifier
-from dataset.DatasetWrapper import DatasetWrapper
-from sklearn.preprocessing import StandardScaler
-import pandas as pd
-
 import numpy as np
 
-print("this if ML")
+from classifiers.KnnClassifier import KnnClassifier
+from sklearn.datasets import make_classification
+from sklearn.metrics import classification_report
 
-# Defines train and test data for classifiers
-data = DatasetWrapper()
-train_data, train_labels = data.get_training_data()
-test_data, test_labels = data.get_testing_data()
 
-df = pd.DataFrame(train_data)
-print(df.describe())
+if __name__ == "__main__":
+    # Create test dataset.
+    # x: (n_samples, n_features), Features
+    # y: (n_samples,) Integer labels for classes
+    x, y = make_classification(n_samples=100, n_classes=2)
+    x_train = x[:80]
+    y_train = y[:80]
+    x_test = x[80:]
+    y_test = y[80:]
 
-# Preprocessing and normalization of data
-scaler = StandardScaler()
-scaler.fit(train_data)
-train_data = scaler.transform(train_data).tolist()
-test_data = scaler.transform(test_data).tolist()
+    classifier = KnnClassifier(n_neighbors=5)
 
-df2 = pd.DataFrame(train_data)
-print(df2.describe())
+    classifier.fit(x_train, y_train)
 
-cross_validation = True
+    y_pred = classifier.predict(x_test)
 
-# Create classifier
-classifier = KnnClassifier(n_neighbors=5)
-# classifier = NaiveBayesClassifier()
-# classifier = AdaBoostClassifier()
-# classifier = NeuralClassifier()
-
-if cross_validation:
-    kfold = KFoldCrossValidation(classifier, train_data, train_labels, n_splits=5)
-    accuracy, precision, recall, f1_score = kfold.get_training_scores()
-
-    print("Accuracy: {}".format(accuracy))
-    print("Precision: {}".format(precision))
-    print("Recall: {}".format(recall))
-    print("F1-Score: {}".format(f1_score))
-
-    print("Final evaluation")
-    accuracy, precision, recall, f1_score = kfold.final_evaluation(test_data, test_labels)
-else:
-    accuracy, precision, recall, f1_score = classifier.fit(train_data, train_labels, epochs=100, batch_size=10)
-    # classifier.fit(train_data, train_labels, epochs=100, batch_size=10)
-    # history_train = classifier.fit(train_data, train_labels, epochs=100, batch_size=10)
-    classifier.evaluate(test_data, test_labels)
-
-# plotter = PlotWrapper()
-# plotter.plot([history_train.history['accuracy']], title='model accuracy', y_label='accuracy', x_label='epoch')
-# nnplotter.plot([accuracy], title='model accuracy', y_label='accuracy', x_label='epoch')
+    print(classification_report(y_true=y_test, y_pred=y_pred))
 
 

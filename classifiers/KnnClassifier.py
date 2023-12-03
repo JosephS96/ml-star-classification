@@ -1,65 +1,56 @@
 from classifiers.BaseClassifier import BaseClassifier
+from util.distances import *
+
 import numpy as np
-import math
 
 
-class KnnClassifier(BaseClassifier):
-    def __init__(self, n_neighbors=5):
-        super().__init__()
-        self.distance = 'euclidean'
+class KnnClassifier():
+    def __init__(self, n_neighbors=5, distance='euclidean'):
+        self.distance_metric = distance
         self.k = n_neighbors
+        self.data = None
+        self.labels = None
+        self.n_labels = None
 
-        self.data = []
-        # self.labels = []
-
-    def get_distance(self, x, y):
+    def __calculate_distance(self, x, y):
         # Calculate distance from point A to point B
         # Assume that x and y are the same dimension array [1, 2, 3, ...]
-        dist_sum = 0
-        for i in range(len(x) - 1):  # -1 excludes the target label form the count
-            dist_sum += (y[i] - x[i]) ** 2
+        assert len(x) == len(y), "Arrays to compare are not the same length"
 
-        return math.sqrt(dist_sum)
+        if self.distance_metric == 'euclidean':
+            return euclidean_distance(x, y)
 
-    def fit(self, x, y, epochs, batch_size):
-        self.set_n_classes(y)
+        return 0
 
-        # Store the dataset for comparison
-        # new_x = []
-        for i in range(len(y)):
-            item = x[i].copy()
-            item.append(y[i])
-            self.data.append(item)
+    def fit(self, x, y):
+        self.data = np.array(x)
+        self.labels = np.array(y)
 
-        # self.data = new_x
+        self.n_labels = len(np.unique(self.labels))
 
     def predict(self, x):
         # Store list of predictions (classes)
         predictions = []
 
         for item in x:
-            # Calculate the distances from one point to all others in the data
+            # Calculate the distances from the current item to all other items in the sample data
             distances = []
-
-            for point in self.data:
+            for sample, label in zip(self.data, self.labels):
                 # Create array containing distance and label for each point -> [distance, label]
-                distances.append([self.get_distance(item, point), point[-1]])
+                distances.append([self.__calculate_distance(item, sample), label])
 
-            # Sorting the distances
+            # Sorting by distances
             distances = sorted(distances, key=lambda value: value[0])
 
             # Trimming the list to size k
             k_neighbors = distances[:self.k]
 
             # Counting the labels from the neighbors
-            # List should be the size of the number of labels -> 6
-            neighbors_count = []
-            for i in range(self.n_classes):
-                neighbors_count.append(0)
-
-            for i in range(self.k):
-                index = k_neighbors[i][-1]
-                neighbors_count[index] += 1
+            # List should be the size of the number of labels
+            neighbors_count = np.zeros(shape=self.n_labels)
+            for neighbor in k_neighbors:
+                label_idx = neighbor[-1]
+                neighbors_count[label_idx] += 1
 
             selected_label = np.argmax(neighbors_count)
             predictions.append(selected_label)
